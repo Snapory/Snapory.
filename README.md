@@ -1,0 +1,2 @@
+# Snapory.
+Snapory

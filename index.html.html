@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snapory - Social Media</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;background:#f5f5f5;color:#111;transition:.25s}
+body.dark{background:#0f1014;color:#f5f5f5}
+body.dark .sidebar,body.dark .card,body.dark .profile-card,body.dark .modal-box{background:#181a20;color:#f5f5f5;border-color:#2b2e36}
+body.dark .search,body.dark .comment-box{background:#20232b;color:#fff;border-color:#343842}
+body.dark .nav button:hover,body.dark .nav button.active{background:#292238}
+body.dark .notification,body.dark .comments{color:#c9cbd2}
+body.dark .comment-box{border-color:#343842}
+.auth-screen{position:fixed;inset:0;background:linear-gradient(135deg,#faf5ff,#fff7fb,#fff);display:grid;place-items:center;z-index:100;padding:20px}
+body.dark .auth-screen{background:linear-gradient(135deg,#101016,#18121f,#101016)}
+.auth-card{width:min(410px,100%);background:#fff;border:1px solid #ddd;border-radius:22px;padding:30px;box-shadow:0 18px 60px #0002;text-align:center}
+body.dark .auth-card{background:#181a20;border-color:#2b2e36}
+.auth-logo{font-size:42px;font-weight:900;background:linear-gradient(45deg,#7c3aed,#ec4899,#f59e0b);-webkit-background-clip:text;color:transparent;margin-bottom:8px}
+.auth-sub{color:#777;margin-bottom:24px}
+.auth-tabs{display:flex;background:#f2f2f5;border-radius:12px;padding:4px;margin-bottom:16px}
+.auth-tabs button{flex:1;padding:10px;border-radius:9px;background:transparent}
+.auth-tabs button.active{background:#fff;box-shadow:0 2px 8px #0001;font-weight:700}
+body.dark .auth-tabs{background:#252832}
+body.dark .auth-tabs button.active{background:#30333d;color:#fff}
+.auth-input{width:100%;padding:14px;border:1px solid #ddd;border-radius:11px;outline:none;margin-bottom:10px}
+.auth-btn{width:100%;padding:14px;border-radius:11px;background:#7c3aed;color:#fff;font-weight:700;margin-top:5px}
+.auth-note{font-size:12px;color:#888;margin-top:14px;line-height:1.5}
+.auth-user{margin-top:16px;padding-top:14px;border-top:1px solid #eee;font-size:13px}
+.logout-btn{padding:9px 13px;border-radius:9px;background:#eee;margin-top:15px}
+.top-create{padding:11px 17px;border-radius:22px;background:#7c3aed;color:#fff;font-weight:700}
+
+button,input,textarea{font:inherit}
+button{cursor:pointer;border:0}
+.app{max-width:1200px;margin:auto;display:grid;grid-template-columns:220px 1fr 280px;min-height:100vh;gap:20px}
+.sidebar{position:sticky;top:0;height:100vh;background:#fff;padding:28px 16px;border-right:1px solid #ddd}
+.logo{font-size:30px;font-weight:800;margin:0 10px 35px;background:linear-gradient(45deg,#7c3aed,#ec4899,#f59e0b);-webkit-background-clip:text;color:transparent}
+.nav button{width:100%;background:transparent;text-align:left;padding:14px 12px;border-radius:12px;font-size:16px;margin:3px 0}
+.nav button:hover,.nav button.active{background:#f0e8ff;font-weight:700}
+.main{padding:20px 0}
+.topbar{display:flex;gap:10px;margin-bottom:18px}
+.search{flex:1;padding:13px 16px;border:1px solid #ddd;border-radius:25px;background:#fff;outline:none}
+.card{background:#fff;border:1px solid #ddd;border-radius:14px;margin-bottom:18px;overflow:hidden}
+.stories{display:flex;gap:16px;padding:16px;overflow:auto}
+.story{text-align:center;min-width:70px}
+.story .avatar{width:62px;height:62px;border-radius:50%;padding:3px;background:linear-gradient(45deg,#f59e0b,#ec4899,#7c3aed);margin:auto}
+.story .avatar span{display:grid;place-items:center;width:100%;height:100%;border-radius:50%;background:#fff;font-size:28px}
+.story small{display:block;margin-top:6px}
+.post-head{display:flex;align-items:center;gap:10px;padding:14px}
+.avatar-sm{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:#ddd;font-size:20px}
+.post-head strong{flex:1}
+.post-img{width:100%;height:430px;object-fit:cover;background:#ddd}
+.actions{display:flex;gap:8px;padding:12px 14px}
+.actions button{background:transparent;font-size:24px}
+.actions .like.liked{color:#e11d48}
+.caption{padding:0 14px 8px;line-height:1.5}
+.comments{padding:0 14px 12px;color:#555}
+.comment-box{display:flex;border-top:1px solid #eee;padding:10px}
+.comment-box input{flex:1;border:0;outline:0}
+.comment-box button{background:transparent;color:#7c3aed;font-weight:bold}
+.right{padding:20px 0}
+.profile-card{background:#fff;border:1px solid #ddd;border-radius:14px;padding:18px}
+.profile-top{display:flex;gap:12px;align-items:center;margin-bottom:15px}
+.big-avatar{width:65px;height:65px;border-radius:50%;display:grid;place-items:center;background:#e9d5ff;font-size:32px}
+.follow-btn{padding:9px 15px;border-radius:9px;background:#7c3aed;color:#fff}
+.stats{display:flex;justify-content:space-between;text-align:center;margin-top:15px}
+.stats b{display:block}
+.section-title{font-size:20px;font-weight:700;padding:16px}
+.reels{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:10px}
+.reel{height:250px;border-radius:12px;background:linear-gradient(145deg,#111,#7c3aed,#ec4899);color:white;display:flex;align-items:flex-end;padding:12px;font-weight:bold}
+.notification{padding:14px;border-bottom:1px solid #eee}
+.modal{position:fixed;inset:0;background:#0008;display:none;place-items:center;padding:20px;z-index:10}
+.modal.show{display:grid}
+.modal-box{background:#fff;border-radius:16px;padding:22px;width:min(500px,100%)}
+.modal-box h2{margin-bottom:15px}
+.modal-box textarea{width:100%;height:120px;border:1px solid #ddd;border-radius:10px;padding:10px;resize:vertical}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:12px}
+.modal-actions button{padding:10px 15px;border-radius:9px}
+.cancel{background:#eee}.publish{background:#7c3aed;color:#fff}
+.toast{position:fixed;bottom:25px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:12px 18px;border-radius:25px;display:none;z-index:20}
+@media(max-width:900px){.top-create{display:none}.app{grid-template-columns:75px 1fr}.sidebar{padding:20px 8px}.logo{font-size:20px;margin:0 5px 25px}.nav button{font-size:0;text-align:center}.nav button::first-letter{font-size:22px}.right{display:none}}
+@media(max-width:600px){.app{display:block}.sidebar{height:auto;position:fixed;bottom:0;left:0;right:0;z-index:5;padding:6px;border-top:1px solid #ddd;border-right:0}.logo{display:none}.nav{display:flex;justify-content:space-around}.nav button{width:auto;margin:0;padding:10px}.main{padding:10px 8px 75px}.post-img{height:330px}.topbar{margin-top:5px}}
+</style>
+</head>
+<body>
+
+<div class="auth-screen" id="authScreen">
+  <div class="auth-card">
+    <div class="auth-logo">Snapory</div>
+    <div class="auth-sub">Login to your social world</div>
+
+    <div class="auth-tabs">
+      <button id="phoneTab" class="active" onclick="setLoginMode('phone')">📱 Phone</button>
+      <button id="emailTab" onclick="setLoginMode('email')">✉️ Email</button>
+    </div>
+
+    <input id="loginInput" class="auth-input" type="tel" placeholder="+91 9876543210" autocomplete="username">
+    <input id="loginPassword" class="auth-input" type="password" placeholder="Password" autocomplete="current-password">
+<input id="confirmPassword" class="auth-input" type="password" placeholder="Confirm Password (Create Account)" autocomplete="new-password">
+    <button class="auth-btn" onclick="loginSnapory()">Login</button>
+    <button class="auth-btn" style="background:#111;margin-top:10px" onclick="signupSnapory()">Create new account</button>
+
+    <div class="auth-note">
+      Demo login: इस HTML version में login browser पर चलता है।<br>
+      Real OTP/SMS/email verification के लिए backend और SMS/email service जोड़नी होगी।
+    </div>
+  </div>
+</div>
+
+<div class="app">
+<aside class="sidebar">
+  <div class="logo">Snapory</div>
+  <nav class="nav">
+    <button class="active" onclick="showHome()">🏠 Home</button>
+    <button onclick="showSearch()">🔍 Search</button>
+    <button onclick="openCreate()">➕ Create</button>
+    <button onclick="showReels()">🎬 Reels</button>
+    <button onclick="showNotifications()">🔔 Notifications</button>
+    <button onclick="showMessages()">💬 Messages</button>
+    <button onclick="showProfile()">👤 Profile</button>
+    <button onclick="toggleTheme()">🌙 Theme</button>
+  </nav>
+</aside>
+
+<main class="main" id="main">
+  <div class="topbar">
+    <input id="searchInput" class="search" placeholder="Search people, posts or hashtags..." oninput="searchUsers(this.value)">
+    <button class="top-create" onclick="openCreate()">＋ Create</button>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Stories ⭕</div>
+    <div class="stories">
+      <div class="story" onclick="toast('Your story')"><div class="avatar"><span>➕</span></div><small>Your story</small></div>
+      <div class="story"><div class="avatar"><span>👩</span></div><small>Priya</small></div>
+      <div class="story"><div class="avatar"><span>👨</span></div><small>Rahul</small></div>
+      <div class="story"><div class="avatar"><span>👩‍💻</span></div><small>Anita</small></div>
+      <div class="story"><div class="avatar"><span>🧑</span></div><small>Amit</small></div>
+    </div>
+  </div>
+
+  <div id="feed">
+    <article class="card post">
+      <div class="post-head"><div class="avatar-sm">👨</div><strong>rahul_snap</strong><span>•••</span></div>
+      <img class="post-img" src="https://picsum.photos/900/700?random=11" alt="Post">
+      <div class="actions">
+        <button class="like" onclick="likePost(this)">♡</button>
+        <button onclick="commentFocus(this)">💬</button>
+        <button onclick="sharePost()">↗️</button>
+      </div>
+      <div class="caption"><b>rahul_snap</b> Beautiful day! 🌄 #snapory #nature</div>
+      <div class="comments" data-count="24">View 24 comments</div>
+      <div class="comment-box"><input placeholder="Add a comment..."><button onclick="addComment(this)">Post</button></div>
+    </article>
+
+    <article class="card post">
+      <div class="post-head"><div class="avatar-sm">👩</div><strong>priya_world</strong><span>•••</span></div>
+      <img class="post-img" src="https://picsum.photos/900/700?random=22" alt="Post">
+      <div class="actions">
+        <button class="like" onclick="likePost(this)">♡</button>
+        <button onclick="commentFocus(this)">💬</button>
+        <button onclick="sharePost()">↗️</button>
+      </div>
+      <div class="caption"><b>priya_world</b> Exploring new places ✨</div>
+      <div class="comments" data-count="18">View 18 comments</div>
+      <div class="comment-box"><input placeholder="Add a comment..."><button onclick="addComment(this)">Post</button></div>
+    </article>
+  </div>
+</main>
+
+<aside class="right">
+  <div class="profile-card">
+    <div class="profile-top">
+      <div class="big-avatar">👤</div>
+      <div><b>ompr</b><br><small>Welcome to Snapory</small></div>
+    </div>
+    <button class="follow-btn" onclick="toggleFollow(this)">Follow</button>
+    <div class="auth-user">Logged in as <b id="loggedUser">Guest</b><br>
+      <button class="logout-btn" onclick="logoutSnapory()">Logout</button>
+    </div>
+    <div class="stats"><div><b>12</b><small>Posts</small></div><div><b>245</b><small>Followers</small></div><div><b>180</b><small>Following</small></div></div>
+  </div>
+  <div class="card" style="margin-top:18px">
+    <div class="section-title">🔔 Notifications</div>
+    <div class="notification">❤️ Rahul liked your post</div>
+    <div class="notification">➕ Priya started following you</div>
+    <div class="notification">💬 Amit commented on your post</div>
+  </div>
+</aside>
+</div>
+<div style="text-align:center;padding:8px;color:#888;font-size:12px">Snapory • Social Media • v2</div>
+
+<div class="modal" id="createModal">
+  <div class="modal-box">
+    <h2>➕ Create Post</h2>
+    <textarea id="captionInput" placeholder="Write a caption..."></textarea>
+<input id="mediaFile" type="file" accept="image/*,video/*" style="width:100%;margin:10px 0;padding:10px;border:1px solid #ddd;border-radius:12px">
+<small style="color:#777">Photo/Video • up to 50MB</small>
+    <div class="modal-actions"><button class="cancel" onclick="closeCreate()">Cancel</button><button class="publish" onclick="publishPost()">Publish</button></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+function toast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';
+  clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.style.display='none',1800);
+}
+function likePost(btn){
+  btn.classList.toggle('liked');
+  btn.textContent=btn.classList.contains('liked')?'♥':'♡';
+  btn.setAttribute('aria-label',btn.classList.contains('liked')?'Unlike':'Like');
+  toast(btn.classList.contains('liked')?'Post liked ❤️':'Like removed');
+}
+function commentFocus(btn){const box=btn.closest('.post').querySelector('.comment-box input');box.focus();}
+function addComment(btn){
+  const input=btn.previousElementSibling;
+  if(!input.value.trim()){toast('Comment लिखें');return}
+  const c=btn.closest('.post').querySelector('.comments');let n=Number(c.dataset.count)+1;c.dataset.count=n;c.textContent='View '+n+' comments';
+  input.value='';toast('Comment posted 💬');
+}
+function sharePost(){navigator.clipboard?.writeText(location.href);toast('Post link copied ↗️');}
+function toggleFollow(btn){btn.textContent=btn.textContent==='Follow'?'Following':'Follow';toast(btn.textContent==='Following'?'Following user ➕':'Unfollowed');}
+function openCreate(){document.getElementById('createModal').classList.add('show');}
+function closeCreate(){document.getElementById('createModal').classList.remove('show');}
+async function publishPost(){
+  const cap=document.getElementById('captionInput').value.trim()||'My new Snapory post ✨';
+  const file=document.getElementById('mediaFile')?.files?.[0];
+
+  if(window.cloudReadyStatus && window.cloudReadyStatus()){
+    if(!file){toast('Photo या video चुनें');return;}
+    await window.uploadCloudPost(file,cap);
+    document.getElementById('captionInput').value='';
+    document.getElementById('mediaFile').value='';
+    closeCreate();
+    return;
+  }
+
+  // Keep the original demo behavior when Firebase is not configured.
+  const post=document.createElement('article');post.className='card post';
+  post.innerHTML=`<div class="post-head"><div class="avatar-sm">👤</div><strong>ompr</strong><span>•••</span></div>
+  <img class="post-img" src="https://picsum.photos/900/700?random=${Math.floor(Math.random()*1000)}" alt="New post">
+  <div class="actions"><button class="like" onclick="likePost(this)">♡</button><button onclick="commentFocus(this)">💬</button><button onclick="sharePost()">↗️</button></div>
+  <div class="caption"><b>ompr</b> ${escapeHtml(cap)}</div><div class="comments" data-count="0">View 0 comments</div>
+  <div class="comment-box"><input placeholder="Add a comment..."><button onclick="addComment(this)">Post</button></div>`;
+  document.getElementById('feed').prepend(post);document.getElementById('captionInput').value='';closeCreate();toast('Post published 🎉');
+}
+function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+function showHome(){window.location.reload();}
+function showSearch(){document.getElementById('searchInput').focus();toast('Search users and posts 🔍');}
+function searchUsers(q){
+  if(q.trim()) toast('Searching: '+q);
+} 
+function toggleTheme(){
+  document.body.classList.toggle('dark');
+  localStorage.setItem('snaporyTheme',document.body.classList.contains('dark')?'dark':'light');
+  toast(document.body.classList.contains('dark')?'Dark mode on 🌙':'Light mode on ☀️');
+}
+(function(){if(localStorage.getItem('snaporyTheme')==='dark')document.body.classList.add('dark');})();
+function showReels(){document.getElementById('main').innerHTML=`<div class="card"><div class="section-title">🎬 Reels</div><div class="reels"><div class="reel">🎵 Trending Reel</div><div class="reel">🔥 Popular Reel</div><div class="reel">😂 Funny Reel</div><div class="reel">🌄 Travel Reel</div></div></div>`;}
+function showNotifications(){document.getElementById('main').innerHTML=`<div class="card"><div class="section-title">🔔 Notifications</div><div class="notification">❤️ Rahul liked your post</div><div class="notification">➕ Priya started following you</div><div class="notification">💬 Amit commented on your post</div></div>`;}
+function showMessages(){
+  document.getElementById('main').innerHTML=`
+  <div class="card">
+    <div class="section-title">💬 Messages</div>
+    <div class="notification"><b>Rahul</b><br><small>Open a user profile to start a chat.</small></div>
+    <div id="chatMessages" style="min-height:180px;padding:10px"></div>
+    <div style="display:flex;gap:8px;padding:14px">
+      <input id="chatInput" class="search" placeholder="Write a message..." style="flex:1">
+      <button class="top-create" onclick="sendChatMessage()">Send</button>
+    </div>
+  </div>`;
+}
+async function sendChatMessage(){
+  const input=document.getElementById('chatInput');
+  if(!input || !input.value.trim()){toast('Message लिखें');return;}
+  if(typeof window.sendCloudMessage==='function' && window.cloudReadyStatus && window.cloudReadyStatus()){
+    // Demo target can be replaced by a selected user's UID from the profile/search UI.
+    const target=window.activeChatUserId;
+    if(!target){toast('पहले किसी user की chat खोलें');return;}
+    await window.sendCloudMessage(target,input.value);
+    input.value='';
+    return;
+  }
+  toast('Real chat के लिए Firebase setup करें');
+}
+function showProfile(){document.getElementById('main').innerHTML=`<div class="profile-card"><div class="profile-top"><div class="big-avatar">👤</div><div><h2>ompr</h2><small>My Snapory Profile</small></div></div><p>Sharing photos, videos and moments ✨</p><div class="stats"><div><b>12</b><small>Posts</small></div><div><b>245</b><small>Followers</small></div><div><b>180</b><small>Following</small></div></div></div>`;}
+
+function setLoginMode(mode){
+  const input=document.getElementById('loginInput');
+  const phone=document.getElementById('phoneTab');
+  const email=document.getElementById('emailTab');
+  if(mode==='phone'){
+    input.type='tel'; input.placeholder='+91 9876543210';
+    phone.classList.add('active'); email.classList.remove('active');
+  }else{
+    input.type='email'; input.placeholder='you@example.com';
+    email.classList.add('active'); phone.classList.remove('active');
+  }
+  input.dataset.mode=mode;
+}
+function loginSnapory(){
+  const input=document.getElementById('loginInput').value.trim();
+  const pass=document.getElementById('loginPassword').value.trim();
+  const mode=document.getElementById('loginInput').dataset.mode || 'phone';
+  if(!input || !pass){toast('Phone/Email और password भरें');return}
+  if(mode==='email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input)){toast('Valid email डालें');return}
+  if(mode==='phone' && input.replace(/\D/g,'').length<10){toast('Valid phone number डालें');return}
+  localStorage.setItem('snaporyUser',input);
+  document.getElementById('authScreen').style.display='none';
+  document.getElementById('loggedUser').textContent=input;
+  toast('Login successful 🎉');
+}
+function signupSnapory(){
+  const input=document.getElementById('loginInput').value.trim();
+  const pass=document.getElementById('loginPassword').value.trim();
+  if(!input || !pass){toast('पहले Phone/Email और password भरें');return}
+  toast('Account created (demo) 🎉');
+  setTimeout(loginSnapory,400);
+}
+function logoutSnapory(){
+  localStorage.removeItem('snaporyUser');
+  document.getElementById('authScreen').style.display='grid';
+  document.getElementById('loginPassword').value='';
+  toast('Logged out');
+}
+(function(){
+  const u=localStorage.getItem('snaporyUser');
+  if(u){
+    document.getElementById('authScreen').style.display='none';
+    document.getElementById('loggedUser').textContent=u;
+  }
+  document.getElementById('loginInput').dataset.mode='phone';
+})();
+
+</script>
+
+<!-- SNAPORY V3 FIREBASE INTEGRATION -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import {
+  getAuth, onAuthStateChanged, createUserWithEmailAndPassword,
+  signInWithEmailAndPassword, signOut, RecaptchaVerifier,
+  signInWithPhoneNumber, updateProfile
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import {
+  getFirestore, collection, addDoc, doc, setDoc, query,
+  orderBy, limit, onSnapshot, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import {
+  getStorage, ref, uploadBytes, getDownloadURL
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-storage.js";
+
+/* ================= FIREBASE CONFIG =================
+   Replace these values with your Firebase project's Web App config.
+*/
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.firebasestorage.app",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+/* =================================================== */
+
+const cloudReady = !Object.values(firebaseConfig).some(v => String(v).startsWith("YOUR_"));
+let auth=null, db=null, storage=null, confirmationResult=null, chatUnsub=null;
+
+if(cloudReady){
+  const app=initializeApp(firebaseConfig);
+  auth=getAuth(app); db=getFirestore(app); storage=getStorage(app);
+
+  onAuthStateChanged(auth, async user=>{
+    if(user){
+      document.getElementById('authScreen').style.display='none';
+      const label=user.displayName || user.email || user.phoneNumber || 'Snapory User';
+      document.getElementById('loggedUser').textContent=label;
+      await setDoc(doc(db,'users',user.uid),{
+        uid:user.uid,
+        displayName:user.displayName || (user.email ? user.email.split('@')[0] : label),
+        email:user.email || null,
+        phone:user.phoneNumber || null,
+        updatedAt:serverTimestamp()
+      },{merge:true});
+      loadCloudFeed();
+    }else{
+      document.getElementById('authScreen').style.display='grid';
+    }
+  });
+}
+
+window.cloudReadyStatus=()=>cloudReady;
+
+window.cloudEmailLogin=async function(){
+  if(!cloudReady){toast('Firebase config पहले भरें');return;}
+  const email=document.getElementById('loginInput').value.trim();
+  const pass=document.getElementById('loginPassword').value;
+  if(!email||!pass){toast('Email और password भरें');return;}
+  try{await signInWithEmailAndPassword(auth,email,pass);toast('Login successful 🎉');}
+  catch(e){toast(e.message);}
+};
+
+window.cloudEmailSignup=async function(){
+  if(!cloudReady){toast('Firebase config पहले भरें');return;}
+  const email=document.getElementById('loginInput').value.trim();
+  const pass=document.getElementById('loginPassword').value;
+  const confirm=document.getElementById('confirmPassword').value;
+  if(!email||!pass||!confirm){toast('Email, password और confirm password भरें');return;}
+  if(pass!==confirm){toast('Password और Confirm Password अलग हैं');return;}
+  if(pass.length<6){toast('Password कम से कम 6 characters का रखें');return;}
+  try{
+    const c=await createUserWithEmailAndPassword(auth,email,pass);
+    await updateProfile(c.user,{displayName:email.split('@')[0]});
+    toast('Account created 🎉');
+  }catch(e){toast(e.message);}
+};
+
+window.cloudPhoneLogin=async function(){
+  if(!cloudReady){toast('Firebase config पहले भरें');return;}
+  const phone=document.getElementById('loginInput').value.trim();
+  if(!/^\+\d{10,15}$/.test(phone)){toast('Phone +91XXXXXXXXXX format में डालें');return;}
+  try{
+    if(!window._snaporyRecaptcha){
+      window._snaporyRecaptcha=new RecaptchaVerifier(auth,'recaptcha-container',{size:'invisible'});
+    }
+    confirmationResult=await signInWithPhoneNumber(auth,phone,window._snaporyRecaptcha);
+    const code=prompt('SMS में आया 6-digit OTP डालें:');
+    if(code) await confirmationResult.confirm(code);
+  }catch(e){toast(e.message);}
+};
+
+window.uploadCloudPost=async function(file,caption){
+  if(!cloudReady){toast('Firebase config पहले भरें');return;}
+  const user=auth.currentUser;
+  if(!user){toast('Login करें');return;}
+  if(file.size>50*1024*1024){toast('File 50MB से छोटी रखें');return;}
+  try{
+    const path=`posts/${user.uid}/${Date.now()}_${file.name}`;
+    const r=ref(storage,path);
+    await uploadBytes(r,file);
+    const url=await getDownloadURL(r);
+    await addDoc(collection(db,'posts'),{
+      uid:user.uid,
+      author:user.displayName||user.email||user.phoneNumber||'User',
+      mediaUrl:url,
+      mediaType:file.type.startsWith('video/')?'video':'image',
+      caption:caption||'',
+      likes:0,
+      createdAt:serverTimestamp()
+    });
+    toast('Post uploaded 🎉');
+  }catch(e){toast(e.message);}
+};
+
+function esc(s){
+  return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+}
+
+function loadCloudFeed(){
+  const q=query(collection(db,'posts'),orderBy('createdAt','desc'),limit(50));
+  onSnapshot(q,snap=>{
+    const feed=document.getElementById('feed');
+    if(!feed)return;
+    feed.innerHTML='';
+    snap.forEach(d=>{
+      const p=d.data(), card=document.createElement('article');
+      card.className='card post';
+      const media=p.mediaType==='video'
+        ? `<video class="post-img" src="${p.mediaUrl}" controls playsinline></video>`
+        : `<img class="post-img" src="${p.mediaUrl}" alt="Snapory post">`;
+      card.innerHTML=`
+        <div class="post-head"><div class="avatar-sm">👤</div><strong>${esc(p.author||'User')}</strong><span>•••</span></div>
+        ${media}
+        <div class="actions">
+          <button class="like" onclick="likePost(this)">♡</button>
+          <button onclick="commentFocus(this)">💬</button>
+          <button onclick="sharePost()">↗️</button>
+        </div>
+        <div class="caption"><b>${esc(p.author||'User')}</b> ${esc(p.caption||'')}</div>
+        <div class="comments" data-count="0">View comments</div>
+        <div class="comment-box"><input placeholder="Add a comment..."><button onclick="addComment(this)">Post</button></div>`;
+      feed.appendChild(card);
+    });
+  });
+}
+
+window.sendCloudMessage=async function(otherUid,text){
+  if(!cloudReady||!auth.currentUser)return;
+  const ids=[auth.currentUser.uid,otherUid].sort();
+  await addDoc(collection(db,'chats',ids.join('_'),'messages'),{
+    senderId:auth.currentUser.uid,
+    text:text.trim(),
+    createdAt:serverTimestamp()
+  });
+};
+
+window.watchCloudChat=function(otherUid,render){
+  if(!cloudReady||!auth.currentUser)return;
+  const ids=[auth.currentUser.uid,otherUid].sort();
+  const q=query(collection(db,'chats',ids.join('_'),'messages'),orderBy('createdAt','asc'),limit(100));
+  if(chatUnsub)chatUnsub();
+  chatUnsub=onSnapshot(q,s=>render(s.docs.map(x=>x.data())));
+};
+</script>
+<div id="recaptcha-container"></div>
+
+<script>
+/* Make the existing UI use real Firebase when configured. */
+const _oldLoginSnapory=window.loginSnapory;
+const _oldSignupSnapory=window.signupSnapory;
+const _oldLogoutSnapory=window.logoutSnapory;
+
+window.loginSnapory=function(){
+  const mode=document.getElementById('loginInput').dataset.mode||'phone';
+  if(window.cloudReadyStatus && window.cloudReadyStatus()){
+    return mode==='email' ? cloudEmailLogin() : cloudPhoneLogin();
+  }
+  return _oldLoginSnapory();
+};
+
+window.signupSnapory=function(){
+  const mode=document.getElementById('loginInput').dataset.mode||'phone';
+  if(window.cloudReadyStatus && window.cloudReadyStatus()){
+    if(mode==='email') return cloudEmailSignup();
+    return cloudPhoneLogin();
+  }
+  return _oldSignupSnapory();
+};
+
+window.logoutSnapory=function(){
+  if(window.cloudReadyStatus && window.cloudReadyStatus()){
+    return signOut(auth);
+  }
+  return _oldLogoutSnapory();
+};
+</script>
+
+</body>
+</html>
